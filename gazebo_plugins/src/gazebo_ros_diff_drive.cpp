@@ -438,10 +438,10 @@ void GazeboRosDiffDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _inf
 #endif
   // Update encoder even if we're going to skip this update
   if (odom_source_ == ENCODER) {
-    UpdateOdometryEncoder(_info.simTime);
+    UpdateOdometryEncoder(_info.realTime);
   }
 
-  double seconds_since_last_update = (_info.simTime - last_update_time_).Double();
+  double seconds_since_last_update = (_info.realTime - last_update_time_).Double();
 
   if (seconds_since_last_update < update_period_) {
     return;
@@ -459,21 +459,21 @@ void GazeboRosDiffDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _inf
   IGN_PROFILE_BEGIN("PublishOdometryMsg");
 #endif
   if (publish_odom_) {
-    PublishOdometryMsg(_info.simTime);
+    PublishOdometryMsg(_info.realTime);
   }
 #ifdef IGN_PROFILER_ENABLE
   IGN_PROFILE_END();
   IGN_PROFILE_BEGIN("PublishWheelsTf");
 #endif
   if (publish_wheel_tf_) {
-    PublishWheelsTf(_info.simTime);
+    PublishWheelsTf(_info.realTime);
   }
 #ifdef IGN_PROFILER_ENABLE
   IGN_PROFILE_END();
   IGN_PROFILE_BEGIN("PublishOdometryTf");
 #endif
   if (publish_odom_tf_) {
-    PublishOdometryTf(_info.simTime);
+    PublishOdometryTf(_info.realTime);
   }
 #ifdef IGN_PROFILER_ENABLE
   IGN_PROFILE_END();
@@ -531,7 +531,7 @@ void GazeboRosDiffDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _inf
     }
   }
 
-  last_update_time_ = _info.simTime;
+  last_update_time_ = _info.realTime;
 }
 
 void GazeboRosDiffDrivePrivate::UpdateWheelVelocities()
