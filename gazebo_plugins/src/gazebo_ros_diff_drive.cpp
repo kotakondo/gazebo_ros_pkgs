@@ -438,10 +438,10 @@ void GazeboRosDiffDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _inf
 #endif
   // Update encoder even if we're going to skip this update
   if (odom_source_ == ENCODER) {
-    UpdateOdometryEncoder(_info.realTime);
+    UpdateOdometryEncoder(_info.simTime);
   }
 
-  double seconds_since_last_update = (_info.realTime - last_update_time_).Double();
+  double seconds_since_last_update = (_info.simTime - last_update_time_).Double();
 
   if (seconds_since_last_update < update_period_) {
     return;
@@ -459,21 +459,21 @@ void GazeboRosDiffDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _inf
   IGN_PROFILE_BEGIN("PublishOdometryMsg");
 #endif
   if (publish_odom_) {
-    PublishOdometryMsg(_info.realTime);
+    PublishOdometryMsg(_info.simTime);
   }
 #ifdef IGN_PROFILER_ENABLE
   IGN_PROFILE_END();
   IGN_PROFILE_BEGIN("PublishWheelsTf");
 #endif
   if (publish_wheel_tf_) {
-    PublishWheelsTf(_info.realTime);
+    PublishWheelsTf(_info.simTime);
   }
 #ifdef IGN_PROFILER_ENABLE
   IGN_PROFILE_END();
   IGN_PROFILE_BEGIN("PublishOdometryTf");
 #endif
   if (publish_odom_tf_) {
-    PublishOdometryTf(_info.realTime);
+    PublishOdometryTf(_info.simTime);
   }
 #ifdef IGN_PROFILER_ENABLE
   IGN_PROFILE_END();
@@ -531,7 +531,7 @@ void GazeboRosDiffDrivePrivate::OnUpdate(const gazebo::common::UpdateInfo & _inf
     }
   }
 
-  last_update_time_ = _info.realTime;
+  last_update_time_ = _info.simTime;
 }
 
 void GazeboRosDiffDrivePrivate::UpdateWheelVelocities()
@@ -620,7 +620,8 @@ void GazeboRosDiffDrivePrivate::UpdateOdometryWorld()
 void GazeboRosDiffDrivePrivate::PublishOdometryTf(const gazebo::common::Time & _current_time)
 {
   geometry_msgs::msg::TransformStamped msg;
-  msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time);
+  // msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(_current_time); // sim time
+  msg.header.stamp = rclcpp::Clock().now();  // ros time
   msg.header.frame_id = odometry_frame_;
   msg.child_frame_id = robot_base_frame_;
   msg.transform.translation =
